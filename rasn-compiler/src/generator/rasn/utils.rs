@@ -896,13 +896,16 @@ impl Rasn {
             ASN1Value::LinkedIntValue {
                 integer_type,
                 value,
-            } => {
-                let val = Literal::i128_unsuffixed(*value);
-                match integer_type {
-                    IntegerType::Unbounded => Ok(quote!(Integer::from(#val))),
-                    _ => Ok(val.to_token_stream()),
+            } => match integer_type {
+                IntegerType::Unbounded => {
+                    let val = Literal::i128_suffixed(*value);
+                    Ok(quote!(Integer::from(#val)))
                 }
-            }
+                _ => {
+                    let val = Literal::i128_unsuffixed(*value);
+                    Ok(val.to_token_stream())
+                }
+            },
             ASN1Value::LinkedCharStringValue(string_type, value) => {
                 let val = value.to_token_stream();
                 match string_type {
